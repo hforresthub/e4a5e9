@@ -8,7 +8,15 @@ const Messages = (props) => {
 
   return (
     <Box>
-      {messages.map((message) => {
+      {messages.sort((message, nextMessage) => {
+        // sort the messages by date
+        if (message.createdAt < nextMessage.createdAt) {
+          return -1
+        }
+        else {
+          return 1
+        }
+      }).map((message) => {
         const time = moment(message.createdAt).format('h:mm');
 
         return message.senderId === userId ? (
