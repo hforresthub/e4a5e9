@@ -62,9 +62,10 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const postMessage = (body) => {
+  // made async
+  const postMessage = async (body) => {
     try {
-      const data = saveMessage(body);
+      const data = await saveMessage(body);
 
       if (!body.conversationId) {
         addNewConvo(body.recipientId, data.message);
@@ -78,9 +79,12 @@ const Home = ({ user, logout }) => {
     }
   };
 
+  // made async
   const addNewConvo = useCallback(
-    async (data) => {
-      const {recipientId, message} = await data
+    async (recipientIdPromise, messagePromise) => {
+      const recipientId = await recipientIdPromise
+      const message = await messagePromise
+      // console.log(recipientId)
       let updatedConversations = conversations.map((element) => element)
       updatedConversations.forEach((convo) => {
         if (convo.otherUser.id === recipientId) {
