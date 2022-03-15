@@ -79,15 +79,17 @@ const Home = ({ user, logout }) => {
   };
 
   const addNewConvo = useCallback(
-    (recipientId, message) => {
-      conversations.forEach((convo) => {
+    async (data) => {
+      const {recipientId, message} = await data
+      let updatedConversations = conversations.map((element) => element)
+      updatedConversations.forEach((convo) => {
         if (convo.otherUser.id === recipientId) {
           convo.messages.push(message);
           convo.latestMessageText = message.text;
           convo.id = message.conversationId;
         }
       });
-      setConversations(conversations);
+      setConversations(updatedConversations);
     },
     [setConversations, conversations]
   );
