@@ -79,12 +79,12 @@ const Home = ({ user, logout }) => {
     }
   };
 
-  // made async
+  // made async for recipientId and message
   const addNewConvo = useCallback(
     async (recipientIdPromise, messagePromise) => {
       const recipientId = await recipientIdPromise
       const message = await messagePromise
-      // console.log(recipientId)
+      // used temporary array for modifying, since you cannot modify a state variable in this way
       let updatedConversations = conversations.map((element) => element)
       updatedConversations.forEach((convo) => {
         if (convo.otherUser.id === recipientId) {
@@ -101,7 +101,6 @@ const Home = ({ user, logout }) => {
   const addMessageToConversation = useCallback(
     async (data) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
-      // console.log(data);
       // data is an unready promise, so need to await
       const { message, sender = null } = await data;
       if (sender !== null) {
