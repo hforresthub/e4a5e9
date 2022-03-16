@@ -31,7 +31,7 @@ const Home = ({ user, logout }) => {
     // make table of current users so we can lookup faster
     conversations.forEach((convo) => {
       currentUsers[convo.otherUser.id] = true;
-    });
+    }); 
 
     const newState = [...conversations];
     users.forEach((user) => {
