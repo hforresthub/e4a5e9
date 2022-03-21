@@ -200,6 +200,8 @@ const Home = ({ user, logout }) => {
             }
           }))
         setConversations(data);
+        // since conversation has been fetched here, this would be a good time to update the db with read receipts,
+        // since all the messages gotten here can be considered read at this time except any sent by this reader
       } catch (error) {
         console.error(error);
       }
