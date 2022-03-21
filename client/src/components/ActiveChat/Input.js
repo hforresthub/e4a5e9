@@ -33,6 +33,7 @@ const Input = ({ otherUser, conversationId, user, postMessage }) => {
       recipientId: otherUser.id,
       conversationId,
       sender: conversationId ? null : user,
+      readReceipt: false,
     };
     await postMessage(reqBody);
     setText('');

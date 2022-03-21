@@ -27,12 +27,12 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const SenderBubble = ({ time, text }) => {
+const SenderBubble = ({ time, text, readReceipt }) => {
   const classes = useStyles();
 
   return (
     <Box className={classes.root}>
-      <Typography className={classes.date}>{time}</Typography>
+      <Typography className={classes.date}>{time} {readReceipt ? `read` : `unread`}</Typography>
       <Box className={classes.bubble}>
         <Typography className={classes.text}>{text}</Typography>
       </Box>
