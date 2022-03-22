@@ -156,6 +156,14 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
+  const getNumberOfUnread = useCallback((convo) => {
+    // console.log(convo.messages);
+    const numberOfUnread = convo.messages.filter((message) => {
+      return !message.readReceipt;
+    }).length;
+    return numberOfUnread;
+  }, [conversations, setActiveChat, addMessageToConversation, activeConversation]);
+
   // Lifecycle
 
   useEffect(() => {
@@ -200,8 +208,6 @@ const Home = ({ user, logout }) => {
             }
           }))
         setConversations(data);
-        // since conversation has been fetched here, this would be a good time to update the db with read receipts,
-        // since all the messages gotten here can be considered read at this time except any sent by this reader
       } catch (error) {
         console.error(error);
       }
@@ -228,6 +234,7 @@ const Home = ({ user, logout }) => {
           clearSearchedUsers={clearSearchedUsers}
           addSearchedUsers={addSearchedUsers}
           setActiveChat={setActiveChat}
+          getNumberOfUnread={getNumberOfUnread}
         />
         <ActiveChat
           activeConversation={activeConversation}
