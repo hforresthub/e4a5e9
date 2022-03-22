@@ -68,13 +68,10 @@ router.get("/", async (req, res, next) => {
       }
       
       // set read receipts to true for other user
-      convoJSON.messages.forEach((currentMessage) => {
-        console.log("otheruser: ", convoJSON.otherUser.id);
-        console.log("message sender: ", currentMessage.senderId);
-        console.log("message: ", currentMessage.text);
-        console.log("userId", userId);
+      conversations[i].messages.forEach((currentMessage) => {
         if (currentMessage.senderId === convoJSON.otherUser.id) {
           currentMessage.readReceipt = true;
+          currentMessage.save()
         }
       })
 
