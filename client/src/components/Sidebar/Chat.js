@@ -15,6 +15,15 @@ const useStyles = makeStyles((theme) => ({
       cursor: 'grab',
     },
   },
+  text: {
+    borderRadius: 50,
+    background: '#0088FF',
+    color: '#FFFFFF',
+    paddingRight: 5,
+    paddingLeft: 5,
+    marginRight: 5,
+    fontSize: 12,
+  },
 }));
 
 const Chat = ({ conversation, setActiveChat }) => {
@@ -34,7 +43,7 @@ const Chat = ({ conversation, setActiveChat }) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-      <Typography className={classes.text}>{conversation.numberUnreadMessages}</Typography>
+      <Typography className={classes.text}>{conversation.numberUnreadMessages > 0 ? conversation.numberUnreadMessages : ''}</Typography>
     </Box>
   );
 };
