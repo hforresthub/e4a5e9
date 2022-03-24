@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Chat = ({ conversation, setActiveChat, getNumberOfUnread }) => {
+const Chat = ({ conversation, setActiveChat }) => {
   const classes = useStyles();
   const { otherUser } = conversation;
 
@@ -34,7 +34,7 @@ const Chat = ({ conversation, setActiveChat, getNumberOfUnread }) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-      <Typography className={classes.text}>{getNumberOfUnread(conversation)}</Typography>
+      <Typography className={classes.text}>{conversation.numberUnreadMessages}</Typography>
     </Box>
   );
 };

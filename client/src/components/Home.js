@@ -31,7 +31,7 @@ const Home = ({ user, logout }) => {
     // make table of current users so we can lookup faster
     conversations.forEach((convo) => {
       currentUsers[convo.otherUser.id] = true;
-    }); 
+    });
 
     const newState = [...conversations];
     users.forEach((user) => {
@@ -88,6 +88,7 @@ const Home = ({ user, logout }) => {
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
             convoCopy.id = message.conversationId;
+            convoCopy.numberUnreadMessages = 1;
             return convoCopy;
           } else {
             return convo;
@@ -96,6 +97,13 @@ const Home = ({ user, logout }) => {
     },
     []
   );
+
+  const getNumberOfUnread = useCallback((convo) => {
+    const numberOfUnread = convo.messages.filter((message) => {
+      return !message.readReceipt && message.senderId === convo.otherUser.id;
+    }).length;
+    return numberOfUnread;
+  }, []);
 
   const addMessageToConversation = useCallback(
     (data) => {
@@ -116,15 +124,26 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
+            convoCopy.numberUnreadMessages = getNumberOfUnread(convoCopy);
             return convoCopy;
           } else {
             return convo;
           }
         })
       );
-    }, []);
+    }, [getNumberOfUnread]);
 
   const setActiveChat = (username) => {
+    if (conversations) {
+      setConversations(prev =>
+        prev.map((convo) => {
+          if (username === convo.otherUser.username) {
+            convo.numberUnreadMessages = 0;
+          }
+          return convo;
+        })
+      );
+    }
     setActiveConversation(username);
   };
 
@@ -156,13 +175,6 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
-  const getNumberOfUnread = useCallback((convo) => {
-    // console.log(convo.messages);
-    const numberOfUnread = convo.messages.filter((message) => {
-      return !message.readReceipt;
-    }).length;
-    return numberOfUnread;
-  }, [conversations, setActiveChat, addMessageToConversation, activeConversation]);
 
   // Lifecycle
 
@@ -198,7 +210,8 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get('/api/conversations');
-        data.forEach(convo =>
+        data.forEach(convo => {
+          convo.numberUnreadMessages = getNumberOfUnread(convo);
           convo.messages.sort((message, nextMessage) => {
             if (message.createdAt < nextMessage.createdAt) {
               return -1
@@ -206,7 +219,8 @@ const Home = ({ user, logout }) => {
             else {
               return 1
             }
-          }))
+          })
+        })
         setConversations(data);
       } catch (error) {
         console.error(error);
@@ -215,7 +229,7 @@ const Home = ({ user, logout }) => {
     if (!user.isFetching) {
       fetchConversations();
     }
-  }, [user]);
+  }, [user, getNumberOfUnread]);
 
   const handleLogout = async () => {
     if (user && user.id) {
