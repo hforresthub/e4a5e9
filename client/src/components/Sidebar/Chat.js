@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     color: '#FFFFFF',
     paddingRight: 5,
     paddingLeft: 5,
-    marginRight: 5,
+    marginRight: 20,
     fontSize: 12,
   },
 }));
