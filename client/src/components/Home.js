@@ -98,13 +98,6 @@ const Home = ({ user, logout }) => {
     []
   );
 
-  const getNumberOfUnread = useCallback( async (convo) => {
-    // const numberOfUnread = convo.messages.filter((message) => {
-    //   return !message.readReceipt && message.senderId === convo.otherUser.id;
-    // }).length;
-    // return numberOfUnread;
-  }, []);
-
   const addMessageToConversation = useCallback(
     (data) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
@@ -130,14 +123,17 @@ const Home = ({ user, logout }) => {
           }
         })
       );
-    }, [getNumberOfUnread]);
+    }, []);
 
   const setActiveChat = (username) => {
     if (conversations) {
       setConversations(prev =>
         prev.map((convo) => {
           if (username === convo.otherUser.username) {
-            convo.numberUnreadMessages = 0;
+            convo.numUnread = 0;
+            const body = {convoId: convo.id};
+            console.log(body);
+            markRead(body);
           }
           return convo;
         })
@@ -174,6 +170,10 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
+  const markRead = async (body) => {
+    const { data } = await axios.post('/api/markRead', body);
+    return data;
+  };
 
   // Lifecycle
 
@@ -227,7 +227,7 @@ const Home = ({ user, logout }) => {
     if (!user.isFetching) {
       fetchConversations();
     }
-  }, [user, getNumberOfUnread]);
+  }, [user]);
 
   const handleLogout = async () => {
     if (user && user.id) {
@@ -246,7 +246,6 @@ const Home = ({ user, logout }) => {
           clearSearchedUsers={clearSearchedUsers}
           addSearchedUsers={addSearchedUsers}
           setActiveChat={setActiveChat}
-          getNumberOfUnread={getNumberOfUnread}
         />
         <ActiveChat
           activeConversation={activeConversation}

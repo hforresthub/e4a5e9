@@ -50,7 +50,7 @@ router.get("/", async (req, res, next) => {
     for (let i = 0; i < conversations.length; i++) {
       const convo = conversations[i];
       const convoJSON = convo.toJSON();
-      
+
       // set a property "otherUser" so that frontend will have easier access
       if (convoJSON.user1) {
         convoJSON.otherUser = convoJSON.user1;
@@ -59,31 +59,20 @@ router.get("/", async (req, res, next) => {
         convoJSON.otherUser = convoJSON.user2;
         delete convoJSON.user2;
       }
-      
+
       // set property for online status of the other user
       if (onlineUsers.includes(convoJSON.otherUser.id)) {
         convoJSON.otherUser.online = true;
       } else {
         convoJSON.otherUser.online = false;
       }
-      
-      // set read receipts to true for other user
-      conversations[i].messages.forEach((currentMessage) => {
-        if (currentMessage.senderId === convoJSON.otherUser.id) {
-          currentMessage.readReceipt = true;
-          currentMessage.save()
-        }
-      })
 
       // count number of unread messages for a convo
       const numUnread = await Message.count({
         where: {
           [Op.and]: {
-            [Op.or]: {
-              user1Id: userId,
-              user2Id: userId,
-            },
-            readReceipt : true,
+            senderId: convoJSON.otherUser.id,
+            readReceipt: false,
           }
         },
       });
@@ -93,7 +82,7 @@ router.get("/", async (req, res, next) => {
       convoJSON.latestMessageText = convoJSON.messages[0].text;
       conversations[i] = convoJSON;
     }
-    
+
     res.json(conversations);
   } catch (error) {
     next(error);

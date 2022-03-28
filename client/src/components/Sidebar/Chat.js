@@ -43,7 +43,7 @@ const Chat = ({ conversation, setActiveChat }) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-      <Typography className={classes.text}>{conversation.numberUnreadMessages > 0 ? conversation.numberUnreadMessages : ''}</Typography>
+      <Typography className={classes.text}>{conversation.numUnread > 0 ? conversation.numUnread : ''}</Typography>
     </Box>
   );
 };

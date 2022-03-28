@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { User, Conversation, Message } = require("../../db/models");
 const { Op } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
+const { Messages } = require("../../../client/src/components/ActiveChat");
 
 // get current number of unread messages for all convos for a user
 
@@ -9,17 +10,20 @@ const onlineUsers = require("../../onlineUsers");
 // include other user model so we have info on username/profile pic (don't include current user info)
 router.post("/", async (req, res, next) => {
   try {
+    console.log('test');
     if (!req.user) {
+      console.log('no user');
       return res.sendStatus(401);
     }
     const userId = req.user.id;
-    const conversations = await Conversation.findAll({
-      where: {
-        [Op.or]: {
-          user1Id: userId,
-          user2Id: userId,
-        },
-      },
+    const convoId = req.body.convoId;
+    // const readMessages = await Messages.update({ readReceipt: true }, {
+    //   where: { conversationId: convoId },
+    // })
+
+    // unnecessary?
+    const conversation = await Conversation.findOne({
+      where: { id: convoId },
       attributes: ["id"],
       order: [[Message, "createdAt", "DESC"]],
       include: [
@@ -48,41 +52,28 @@ router.post("/", async (req, res, next) => {
         },
       ],
     });
-
-    for (let i = 0; i < conversations.length; i++) {
-      const convo = conversations[i];
-      const convoJSON = convo.toJSON();
-      
-      // set a property "otherUser" so that frontend will have easier access
-      if (convoJSON.user1) {
-        convoJSON.otherUser = convoJSON.user1;
-        delete convoJSON.user1;
-      } else if (convoJSON.user2) {
-        convoJSON.otherUser = convoJSON.user2;
-        delete convoJSON.user2;
-      }
-      
-      // set property for online status of the other user
-      if (onlineUsers.includes(convoJSON.otherUser.id)) {
-        convoJSON.otherUser.online = true;
-      } else {
-        convoJSON.otherUser.online = false;
-      }
-      
-      // set read receipts to true for other user
-      conversations[i].messages.forEach((currentMessage) => {
-        if (currentMessage.senderId === convoJSON.otherUser.id) {
-          currentMessage.readReceipt = true;
-          currentMessage.save()
-        }
-      })
-
-      // set properties for notification count and latest message preview
-      convoJSON.latestMessageText = convoJSON.messages[0].text;
-      conversations[i] = convoJSON;
+    const convoJSON = conversation.toJSON();
+    
+    // set a property "otherUser" so that frontend will have easier access
+    if (convoJSON.user1) {
+      convoJSON.otherUser = convoJSON.user1;
+      delete convoJSON.user1;
+    } else if (convoJSON.user2) {
+      convoJSON.otherUser = convoJSON.user2;
+      delete convoJSON.user2;
     }
     
-    res.json(conversations);
+    // set read receipts to true for other user
+    convoJSON.messages.forEach((currentMessage) => {
+      if (currentMessage.senderId === convoJSON.otherUser.id) {
+        currentMessage.readReceipt = true;
+        // currentMessage.save();
+      }
+    })
+
+    conversation = convoJSON;
+    console.log(convoJSON);
+    res.json(convoJSON);
   } catch (error) {
     next(error);
   }
