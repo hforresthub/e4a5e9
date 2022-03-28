@@ -132,7 +132,6 @@ const Home = ({ user, logout }) => {
           if (username === convo.otherUser.username) {
             convo.numUnread = 0;
             const body = {convoId: convo.id};
-            console.log(body);
             markRead(body);
           }
           return convo;
