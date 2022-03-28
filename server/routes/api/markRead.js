@@ -3,9 +3,11 @@ const { User, Conversation, Message } = require("../../db/models");
 const { Op } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
 
+// get current number of unread messages for all convos for a user
+
 // get all conversations for a user, include latest message text for preview, and all messages
 // include other user model so we have info on username/profile pic (don't include current user info)
-router.get("/", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     if (!req.user) {
       return res.sendStatus(401);
@@ -74,20 +76,6 @@ router.get("/", async (req, res, next) => {
           currentMessage.save()
         }
       })
-
-      // count number of unread messages for a convo
-      const numUnread = await Message.count({
-        where: {
-          [Op.and]: {
-            [Op.or]: {
-              user1Id: userId,
-              user2Id: userId,
-            },
-            readReceipt : true,
-          }
-        },
-      });
-      convoJSON.numUnread = numUnread;
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;

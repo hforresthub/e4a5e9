@@ -88,7 +88,7 @@ const Home = ({ user, logout }) => {
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
             convoCopy.id = message.conversationId;
-            convoCopy.numberUnreadMessages = 1;
+            convoCopy.numUnread = 1;
             return convoCopy;
           } else {
             return convo;
@@ -98,11 +98,11 @@ const Home = ({ user, logout }) => {
     []
   );
 
-  const getNumberOfUnread = useCallback((convo) => {
-    const numberOfUnread = convo.messages.filter((message) => {
-      return !message.readReceipt && message.senderId === convo.otherUser.id;
-    }).length;
-    return numberOfUnread;
+  const getNumberOfUnread = useCallback( async (convo) => {
+    // const numberOfUnread = convo.messages.filter((message) => {
+    //   return !message.readReceipt && message.senderId === convo.otherUser.id;
+    // }).length;
+    // return numberOfUnread;
   }, []);
 
   const addMessageToConversation = useCallback(
@@ -124,7 +124,6 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
-            convoCopy.numberUnreadMessages = getNumberOfUnread(convoCopy);
             return convoCopy;
           } else {
             return convo;
@@ -211,7 +210,6 @@ const Home = ({ user, logout }) => {
       try {
         const { data } = await axios.get('/api/conversations');
         data.forEach(convo => {
-          convo.numberUnreadMessages = getNumberOfUnread(convo);
           convo.messages.sort((message, nextMessage) => {
             if (message.createdAt < nextMessage.createdAt) {
               return -1
