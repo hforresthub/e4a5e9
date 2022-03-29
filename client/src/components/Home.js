@@ -117,6 +117,9 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
+            convoCopy.numUnread += 1;
+            const body = {convoId: convo.id};
+            markRead(body);
             return convoCopy;
           } else {
             return convo;

@@ -4,17 +4,22 @@ import { SenderBubble, OtherUserBubble } from '.';
 import moment from 'moment';
 
 const Messages = (props) => {
-  const { messages, otherUser, userId } = props;
+  const { messages, otherUser, userId, lastReadMessageId } = props;
 
-  const checkId = (message) => {
-    const lastReadMessage = messages.slice().reverse().find(message => {
-      return message.readReceipt && message.senderId === userId;
-    });
-    const lastReadMessageId = (lastReadMessage ? lastReadMessage.id : messages.slice().reverse().find(message => {
-      return message.senderId === userId;
-    }).id);
+  // const checkId = (message) => {
+  //   const lastReadMessage = messages.slice().reverse().find(message => {
+  //     return message.readReceipt && message.senderId === userId;
+  //   });
+  //   const lastReadMessageId = (lastReadMessage ? lastReadMessage.id : messages.slice().reverse().find(message => {
+  //     return message.senderId === userId;
+  //   }).id);
 
-    return lastReadMessageId === message.id;
+  //   return lastReadMessageId === message.id;
+  // }
+  const isLastReadMessage = (messageId) => {
+    // console.log('message id: ', messageId);
+    // console.log('lastRead id: ', lastReadMessageId);
+    return lastReadMessageId === messageId;
   }
 
   return (
@@ -27,8 +32,7 @@ const Messages = (props) => {
             key={message.id}
             text={message.text}
             time={time}
-            readReceipt={message.readReceipt}
-            currentUnread={checkId(message)}
+            isLastReadMessage={isLastReadMessage(message.id)}
             otherUser={otherUser}
           />
         ) : (

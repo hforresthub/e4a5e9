@@ -34,7 +34,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const SenderBubble = ({ time, text, readReceipt, currentUnread, otherUser }) => {
+const SenderBubble = ({ time, text, isLastReadMessage, otherUser }) => {
   const classes = useStyles();
 
   return (
@@ -43,7 +43,7 @@ const SenderBubble = ({ time, text, readReceipt, currentUnread, otherUser }) => 
       <Box className={classes.bubble}>
         <Typography className={classes.text}>{text}</Typography>
       </Box>
-      {currentUnread ?
+      {isLastReadMessage ?
         <Avatar
           alt={otherUser.username}
           src={otherUser.photoUrl}
