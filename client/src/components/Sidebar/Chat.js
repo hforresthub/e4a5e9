@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@material-ui/core';
+import { Badge, Box } from '@material-ui/core';
 import { BadgeAvatar, ChatContent } from '../Sidebar';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -16,13 +16,9 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   text: {
-    borderRadius: 50,
-    background: '#0088FF',
-    color: '#FFFFFF',
     paddingRight: 5,
     paddingLeft: 5,
     marginRight: 20,
-    fontSize: 12,
   },
 }));
 
@@ -43,7 +39,9 @@ const Chat = ({ conversation, setActiveChat }) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-      <Typography className={classes.text}>{conversation.numUnread > 0 ? conversation.numUnread : ''}</Typography>
+      {conversation.numUnread > 0 ?
+        <Badge badgeContent={conversation.numUnread} className={classes.text} color='primary' />
+        : ''}
     </Box>
   );
 };
