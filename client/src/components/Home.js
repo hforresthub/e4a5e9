@@ -117,16 +117,23 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
-            convoCopy.numUnread += 1;
-            const body = {convoId: convo.id};
-            markRead(body);
+            if (message.senderId === convoCopy.otherUser.id) {
+              convoCopy.numUnread += 1;
+            }
+            console.log("active: ", activeConversation);
+            console.log("name: ", convoCopy);
+            // if this is the active conversation, mark incoming message as read 
+            if (activeConversation === convoCopy.otherUser.username) {
+              const body = {convoId: convo.id};
+              markRead(body);
+            }
             return convoCopy;
           } else {
             return convo;
           }
         })
       );
-    }, []);
+    }, [activeConversation]);
 
   const setActiveChat = (username) => {
     if (conversations) {
