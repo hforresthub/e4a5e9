@@ -48,7 +48,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("current-active-chat", (data) => {
-    console.log('testing server socket');
     socket.broadcast.emit("current-active-chat", {
       message: data.message,
       sender: data.sender,
