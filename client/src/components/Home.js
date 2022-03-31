@@ -121,14 +121,10 @@ const Home = ({ user, logout }) => {
             if (activeConversation === convoCopy.otherUser.username) {
               const body = { convoId: convo.id };
               markRead(body);
-              console.log("convo: ", convoCopy);
-              console.log("senderid: ", message.senderId);
               if (message.senderId === convoCopy.otherUser.id) {
-                // convoCopy.lastReadMessageId = message.id;
-                console.log('emitted');
                 socket.emit('current-active-chat', {
-                  message: 'test',
-                  sender: 'test',
+                  message: message.text,
+                  sender: convoCopy.otherUser.username,
                   convoId: convo.id,
                   recipientId: convoCopy.otherUser.id,
                   senderId: message.senderId,
@@ -176,10 +172,6 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
-  const testSocket = useCallback((id) => {
-    console.log('testing sockets');
-  }, []);
-
   const removeOfflineUser = useCallback((id) => {
     setConversations((prev) =>
       prev.map((convo) => {
@@ -199,15 +191,12 @@ const Home = ({ user, logout }) => {
     return data;
   };
 
-  const updateActive = (body) => {
-    console.log("updated: ", body);
-    const { convoId, senderId, messageId } = body; //recipientId
-    console.log("updated convo id: ", convoId);
+  const updateActive = useCallback((body) => {
+    const { sender, convoId, messageId } = body; //recipientId
     setConversations((prev) =>
       prev.map((convo) => {
         const convoCopy = { ...convo };
-        console.log(convoCopy);
-        if (convoCopy.id === convoId && convoCopy.otherUser.id === senderId) {
+        if (convoCopy.id === convoId && convoCopy.otherUser.username !== sender) {
           convoCopy.lastReadMessageId = messageId;
           return convoCopy;
         } else {
@@ -215,7 +204,7 @@ const Home = ({ user, logout }) => {
         }
       })
     );
-  }
+  }, []);
 
   // Lifecycle
 
@@ -224,7 +213,6 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-    // socket.on('current-active-chat', testSocket);
     socket.on('current-active-chat', updateActive);
 
     return () => {
@@ -233,10 +221,9 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
-      // socket.off('current-active-chat', testSocket);
       socket.off('current-active-chat', updateActive);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket, testSocket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket, updateActive]);
 
   useEffect(() => {
     // when fetching, prevent redirect
