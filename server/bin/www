@@ -47,6 +47,14 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("current-active-chat", (data) => {
+    console.log('testing server socket');
+    socket.broadcast.emit("current-active-chat", {
+      message: data.message,
+      sender: data.sender,
+    });
+  });
+
   socket.on("logout", (id) => {
     if (onlineUsers.includes(id)) {
       userIndex = onlineUsers.indexOf(id);
