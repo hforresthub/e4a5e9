@@ -127,6 +127,8 @@ const Home = ({ user, logout }) => {
                 // convoCopy.lastReadMessageId = message.id;
                 console.log('emitted');
                 socket.emit('current-active-chat', {
+                  message: 'test',
+                  sender: 'test',
                   convoId: convo.id,
                   recipientId: convoCopy.otherUser.id,
                   senderId: message.senderId,
@@ -198,20 +200,21 @@ const Home = ({ user, logout }) => {
   };
 
   const updateActive = (body) => {
-    console.log("updated");
-    // const { convoId, senderId, messageId } = body; //recipientId
-    // setConversations((prev) =>
-    //   prev.map((convo) => {
-    //     const convoCopy = { ...convo };
-    //     console.log(convoCopy);
-    //     if (convoCopy.id === convoId && convoCopy.otherUser.id === senderId) {
-    //       convoCopy.lastReadMessageId = messageId;
-    //       return convoCopy;
-    //     } else {
-    //       return convo;
-    //     }
-    //   })
-    // );
+    console.log("updated: ", body);
+    const { convoId, senderId, messageId } = body; //recipientId
+    console.log("updated convo id: ", convoId);
+    setConversations((prev) =>
+      prev.map((convo) => {
+        const convoCopy = { ...convo };
+        console.log(convoCopy);
+        if (convoCopy.id === convoId && convoCopy.otherUser.id === senderId) {
+          convoCopy.lastReadMessageId = messageId;
+          return convoCopy;
+        } else {
+          return convo;
+        }
+      })
+    );
   }
 
   // Lifecycle
@@ -221,7 +224,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-    socket.on('current-active-chat', testSocket);
+    // socket.on('current-active-chat', testSocket);
     socket.on('current-active-chat', updateActive);
 
     return () => {
@@ -230,7 +233,7 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
-      socket.off('current-active-chat', testSocket);
+      // socket.off('current-active-chat', testSocket);
       socket.off('current-active-chat', updateActive);
     };
   }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket, testSocket]);
