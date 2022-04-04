@@ -39,9 +39,7 @@ const Chat = ({ conversation, setActiveChat }) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-      {conversation.numUnread > 0 ?
-        <Badge badgeContent={conversation.numUnread} className={classes.text} color='primary' />
-        : ''}
+      <Badge badgeContent={conversation.numUnread} className={classes.text} color='primary' />
     </Box>
   );
 };

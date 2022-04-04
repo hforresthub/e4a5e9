@@ -1,7 +1,6 @@
 const router = require("express").Router();
-const { User, Conversation, Message } = require("../../db/models");
+const { Conversation, Message } = require("../../db/models");
 const { Op } = require("sequelize");
-const onlineUsers = require("../../onlineUsers");
 
 // get current number of unread messages for all convos for a user
 
@@ -13,12 +12,17 @@ router.post("/", async (req, res, next) => {
     const userId = req.user.id;
     const convoId = req.body.convoId;
 
+    const currentConvo = await Conversation.findOne({ where: { id: convoId } });
+    if (userId !== currentConvo.user1Id && userId !== currentConvo.user2Id) {
+      return res.sendStatus(403);
+    }
+
     // update messages not sent by user, for that convo, to read
     const readMessages = await Message.update({ readReceipt: true }, {
       where: { senderId: { [Op.not]: userId, }, conversationId: convoId },
     })
 
-    res.json("");
+    return res.sendStatus(204);
 
   } catch (error) {
     next(error);
