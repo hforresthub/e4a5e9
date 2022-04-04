@@ -49,11 +49,11 @@ io.on("connection", (socket) => {
 
   socket.on("current-active-chat", (data) => {
     socket.broadcast.emit("current-active-chat", {
-      message: data.message,
+      // message: data.message,
       sender: data.sender,
       convoId: data.convoId,
-      recipientId: data.recipientId,
-      senderId: data.senderId,
+      // recipientId: data.recipientId,
+      // senderId: data.senderId,
       messageId: data.messageId,
     });
   });

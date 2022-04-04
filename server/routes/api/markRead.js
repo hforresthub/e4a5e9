@@ -14,13 +14,23 @@ router.post("/", async (req, res, next) => {
 
     const currentConvo = await Conversation.findOne({ where: { id: convoId } });
     if (userId !== currentConvo.user1Id && userId !== currentConvo.user2Id) {
-      return res.sendStatus(403);
+      // return res.sendStatus(403);
     }
 
     // update messages not sent by user, for that convo, to read
     const readMessages = await Message.update({ readReceipt: true }, {
       where: { senderId: { [Op.not]: userId, }, conversationId: convoId },
     })
+
+    const lastReadMessage = await Message.findOne({
+      where: { senderId: { [Op.not]: userId, }, conversationId: convoId, readReceipt: true },
+      order: [ [ 'createdAt', 'DESC' ]],
+    });
+    console.log('last read id at markread: ', lastReadMessage.id);
+
+    if (lastReadMessage) {
+      res.json(lastReadMessage)
+    }
 
     return res.sendStatus(204);
 
