@@ -123,11 +123,8 @@ const Home = ({ user, logout }) => {
               markRead(body);
               if (message.senderId === convoCopy.otherUser.id) {
                 socket.emit('current-active-chat', {
-                  // message: message.text,
                   sender: convoCopy.otherUser.username,
                   convoId: convo.id,
-                  // recipientId: convoCopy.otherUser.id,
-                  // senderId: message.senderId,
                   messageId: message.id,
                 });
               }
@@ -146,21 +143,22 @@ const Home = ({ user, logout }) => {
     if (conversations) {
       setConversations(prev =>
         prev.map((convo) => {
-          if (username === convo.otherUser.username) {
+          if (username === convo.otherUser.username && convo.messages.length > 0) {
             convo.numUnread = 0;
             const body = { convoId: convo.id };
-            const lastReadMessageId = markRead(body);
-            console.log('last id: ', lastReadMessageId);
-            // if (message.senderId === convo.otherUser.id) {
-              socket.emit('current-active-chat', {
-                // message: message.text,
-                sender: user.username,
+            const numMessages = convo.messages.length;
+            const lastReadMessage = convo.messages[numMessages - 1]
+            const lastReadMessageId = lastReadMessage.id;
+            markRead(body);
+            // something strange here, need to investigate further
+            if (convo.messages[numMessages - 1].senderId === convo.otherUser.id) {
+              const emitBody = {
+                sender: convo.otherUser.username,
                 convoId: convo.id,
-                // recipientId: convoCopy.otherUser.id,
-                // senderId: message.senderId,
                 messageId: lastReadMessageId,
-              });
-            // }
+              };
+              socket.emit('current-active-chat', emitBody);
+             }
           }
           return convo;
         })
@@ -204,13 +202,10 @@ const Home = ({ user, logout }) => {
 
   const updateActive = useCallback((body) => {
     const { sender, convoId, messageId } = body;
-    console.log(body);
     setConversations((prev) =>
       prev.map((convo) => {
         const convoCopy = { ...convo };
-        console.log(convoCopy);
         if (convoCopy.id === convoId && convoCopy.otherUser.username !== sender) {
-          console.log('passed if, last id is: ', messageId);
           convoCopy.lastReadMessageId = messageId;
           return convoCopy;
         } else {

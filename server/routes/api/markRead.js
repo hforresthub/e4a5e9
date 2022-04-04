@@ -22,16 +22,6 @@ router.post("/", async (req, res, next) => {
       where: { senderId: { [Op.not]: userId, }, conversationId: convoId },
     })
 
-    const lastReadMessage = await Message.findOne({
-      where: { senderId: { [Op.not]: userId, }, conversationId: convoId, readReceipt: true },
-      order: [ [ 'createdAt', 'DESC' ]],
-    });
-    console.log('last read id at markread: ', lastReadMessage.id);
-
-    if (lastReadMessage) {
-      res.json(lastReadMessage)
-    }
-
     return res.sendStatus(204);
 
   } catch (error) {
