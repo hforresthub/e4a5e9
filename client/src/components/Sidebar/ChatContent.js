@@ -18,6 +18,12 @@ const useStyles = makeStyles((theme) => ({
     color: "#9CADC8",
     letterSpacing: -0.17,
   },
+  previewBoldText: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: "#000000",
+    letterSpacing: -0.17,
+  },
 }));
 
 const ChatContent = ({ conversation }) => {
@@ -32,9 +38,15 @@ const ChatContent = ({ conversation }) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
-          {latestMessageText}
-        </Typography>
+        {conversation.numUnread > 0 ?
+          <Typography className={classes.previewBoldText}>
+            {latestMessageText}
+          </Typography>
+          :
+          <Typography className={classes.previewText}>
+            {latestMessageText}
+          </Typography>
+        }
       </Box>
     </Box>
   );

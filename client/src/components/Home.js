@@ -31,7 +31,7 @@ const Home = ({ user, logout }) => {
     // make table of current users so we can lookup faster
     conversations.forEach((convo) => {
       currentUsers[convo.otherUser.id] = true;
-    }); 
+    });
 
     const newState = [...conversations];
     users.forEach((user) => {
@@ -59,6 +59,7 @@ const Home = ({ user, logout }) => {
       message: data.message,
       recipientId: body.recipientId,
       sender: data.sender,
+      readReceipt: false,
     });
   };
 
@@ -87,6 +88,7 @@ const Home = ({ user, logout }) => {
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
             convoCopy.id = message.conversationId;
+            convoCopy.numUnread = 0;
             return convoCopy;
           } else {
             return convo;
@@ -115,15 +117,53 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
+            // if this is the active conversation, mark incoming message as read, otherwise update the unread count 
+            if (activeConversation === convoCopy.otherUser.username) {
+              const body = { convoId: convo.id };
+              markRead(body);
+              if (message.senderId === convoCopy.otherUser.id) {
+                socket.emit('current-active-chat', {
+                  sender: convoCopy.otherUser.username,
+                  convoId: convo.id,
+                  messageId: message.id,
+                });
+              }
+            } else if (message.senderId === convoCopy.otherUser.id) {
+              convoCopy.numUnread += 1;
+            }
             return convoCopy;
           } else {
             return convo;
           }
         })
       );
-    }, []);
+    }, [activeConversation, socket]);
 
   const setActiveChat = (username) => {
+    if (conversations) {
+      setConversations(prev =>
+        prev.map((convo) => {
+          if (username === convo.otherUser.username && convo.messages.length > 0) {
+            convo.numUnread = 0;
+            const body = { convoId: convo.id };
+            const numMessages = convo.messages.length;
+            const lastReadMessage = convo.messages[numMessages - 1]
+            const lastReadMessageId = lastReadMessage.id;
+            markRead(body);
+            // something strange here, need to investigate further
+            if (convo.messages[numMessages - 1].senderId === convo.otherUser.id) {
+              const emitBody = {
+                sender: convo.otherUser.username,
+                convoId: convo.id,
+                messageId: lastReadMessageId,
+              };
+              socket.emit('current-active-chat', emitBody);
+             }
+          }
+          return convo;
+        })
+      );
+    }
     setActiveConversation(username);
   };
 
@@ -155,6 +195,26 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
+  const markRead = async (body) => {
+    const { data } = await axios.post('/api/markRead', body);
+    return data;
+  };
+
+  const updateActive = useCallback((body) => {
+    const { sender, convoId, messageId } = body;
+    setConversations((prev) =>
+      prev.map((convo) => {
+        const convoCopy = { ...convo };
+        if (convoCopy.id === convoId && convoCopy.otherUser.username !== sender) {
+          convoCopy.lastReadMessageId = messageId;
+          return convoCopy;
+        } else {
+          return convo;
+        }
+      })
+    );
+  }, []);
+
   // Lifecycle
 
   useEffect(() => {
@@ -162,6 +222,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('current-active-chat', updateActive);
 
     return () => {
       // before the component is destroyed
@@ -169,8 +230,9 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('current-active-chat', updateActive);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket, updateActive]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -189,7 +251,7 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get('/api/conversations');
-        data.forEach(convo =>
+        data.forEach(convo => {
           convo.messages.sort((message, nextMessage) => {
             if (message.createdAt < nextMessage.createdAt) {
               return -1
@@ -197,7 +259,8 @@ const Home = ({ user, logout }) => {
             else {
               return 1
             }
-          }))
+          })
+        })
         setConversations(data);
       } catch (error) {
         console.error(error);
