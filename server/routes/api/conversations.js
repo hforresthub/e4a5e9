@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { User, Conversation, Message } = require("../../db/models");
+const { User, Conversation, Message, UsersConversations } = require("../../db/models");
 const { Op } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
 
@@ -12,40 +12,48 @@ router.get("/", async (req, res, next) => {
     }
     const userId = req.user.id;
     const conversations = await Conversation.findAll({
-      where: {
-        [Op.or]: {
-          user1Id: userId,
-          user2Id: userId,
-        },
-      },
-      attributes: ["id"],
-      order: [[Message, "createdAt", "DESC"]],
-      include: [
-        { model: Message, order: ["createdAt", "DESC"] },
-        {
-          model: User,
-          as: "user1",
-          where: {
-            id: {
-              [Op.not]: userId,
-            },
-          },
-          attributes: ["id", "username", "photoUrl"],
-          required: false,
-        },
-        {
-          model: User,
-          as: "user2",
-          where: {
-            id: {
-              [Op.not]: userId,
-            },
-          },
-          attributes: ["id", "username", "photoUrl"],
-          required: false,
-        },
-      ],
+      include: User,
     });
+    console.log(conversations[0].toJSON());
+    const users = await User.findAll({
+      include: Conversation,
+    });
+    console.log(users[0].toJSON());
+    // const conversations = await Conversation.findAll({
+    //   where: {
+    //     [Op.or]: {
+    //       user1Id: userId,
+    //       user2Id: userId,
+    //     },
+    //   },
+    //   attributes: ["id"],
+    //   order: [[Message, "createdAt", "DESC"]],
+    //   include: [
+    //     { model: Message, order: ["createdAt", "DESC"] },
+    //     {
+    //       model: User,
+    //       // as: "user1",
+    //       where: {
+    //         id: {
+    //           [Op.not]: userId,
+    //         },
+    //       },
+    //       attributes: ["id", "username", "photoUrl"],
+    //       required: false,
+    //     },
+    //     {
+    //       model: User,
+    //       // as: "user2",
+    //       where: {
+    //         id: {
+    //           [Op.not]: userId,
+    //         },
+    //       },
+    //       attributes: ["id", "username", "photoUrl"],
+    //       required: false,
+    //     },
+    //   ],
+    // });
 
     for (let i = 0; i < conversations.length; i++) {
       const convo = conversations[i];

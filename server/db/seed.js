@@ -28,6 +28,9 @@ async function seed() {
     user2Id: santiago.id,
   });
 
+  await santiago.addUsersConversations(santaigoConvo, {});
+  await thomas.addUsersConversations(santaigoConvo, {});
+
   await Message.create({
     conversationId: santaigoConvo.id,
     senderId: santiago.id,
