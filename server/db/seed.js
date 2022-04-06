@@ -1,5 +1,5 @@
 const db = require("./db");
-const { User } = require("./models");
+const { User, UsersConversations } = require("./models");
 const Conversation = require("./models/conversation");
 const Message = require("./models/message");
 
