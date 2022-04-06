@@ -28,6 +28,7 @@ async function seed() {
     user2Id: santiago.id,
   });
 
+  // this is how we would add conversations to users
   await santiago.addConversation(santaigoConvo, {through: { selfGranted: false }});
   await thomas.addConversation(santaigoConvo, {through: { selfGranted: false }});
 
@@ -79,6 +80,8 @@ async function seed() {
     user2Id: hualing.id,
     user1Id: thomas.id,
   });
+  await hualing.addConversation(hualingConvo, {through: { selfGranted: false }});
+  await thomas.addConversation(hualingConvo, {through: { selfGranted: false }});
 
   for (let i = 0; i < 11; i++) {
     await Message.create({
