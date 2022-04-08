@@ -8,19 +8,15 @@ const Conversation = db.define("conversation", {});
 
 Conversation.findConversation = async function (user1Id, user2Id) {
   const conversation = await Conversation.findOne({
-      include: { 
-        model: User,
-        where: { 
-          [Op.or]: {
-                  id: user1Id,
-                  id: user2Id,
-                },
-         }, 
-      },
+    where: {
+      user1Id: {
+        [Op.or]: [user1Id, user2Id]
+    },
+  },
   });
 
-  // return conversation or null if it doesn't exist
-  return conversation;
+// return conversation or null if it doesn't exist
+return conversation;
 };
 
 module.exports = Conversation;
